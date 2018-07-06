@@ -6,10 +6,10 @@ import imutils
 from imutils.video import VideoStream
 from collections import deque
 
-colors = ["green", "blue", "purple"]
-trail_length = 100 
-
-
+#Enter colors, last colors show up on top
+#Choose from green, blue, red, yellow, purple
+colors = ["green", "blue", "red", "yellow"] 
+trail_length = 80
 
 
 ind = len(colors)
@@ -17,10 +17,12 @@ boundLower = [] #HSV colors
 boundUpper = [] #HSV colors
 markerColor = [] #BGR colors
 pts = [] #Container for trail points
+colorLabel = [];
 
 #Save color constants
 if "green" in colors:
-	greenLower = (29, 86, 100)
+	colorLabel.append("green")
+	greenLower = (29, 80, 80)
 	greenUpper = (70, 255, 225)
 	greenMarker = (0, 255, 0)
 	greenPts = deque(maxlen=trail_length)
@@ -30,6 +32,7 @@ if "green" in colors:
 	pts.append(greenPts)
 
 if "blue" in colors:
+	colorLabel.append("blue")
 	blueLower = (80, 100, 100)
 	blueUpper = (130, 255, 225)
 	blueMarker = (255, 0, 0)
@@ -39,15 +42,38 @@ if "blue" in colors:
 	markerColor.append(blueMarker)
 	pts.append(bluePts)
 
+if "red" in colors:
+	colorLabel.append("red")
+	redLower = (80, 120, 100)  #Cyan upper and lower bounds, since image is inverted for red
+	redUpper = (100, 255, 225) 
+	redMarker = (0, 0, 255)
+	redPts = deque(maxlen=trail_length)
+	boundLower.append(redLower)
+	boundUpper.append(redUpper)
+	markerColor.append(redMarker)
+	pts.append(redPts)
+
 if "purple" in colors:
-	purpleLower = (130, 100, 100)
+	colorLabel.append("purple")
+	purpleLower = (140, 80, 80)
 	purpleUpper = (165, 255, 225)
-	purpleMarker = (255, 0, 174)
+	purpleMarker = (255, 0, 200)
 	purplePts = deque(maxlen=trail_length)
 	boundLower.append(purpleLower)
 	boundUpper.append(purpleUpper)
 	markerColor.append(purpleMarker)
 	pts.append(purplePts)
+
+if "yellow" in colors:
+	colorLabel.append("yellow")
+	yellowLower = (20, 120, 100)
+	yellowUpper = (35, 255, 225)
+	yellowMarker = (0, 255, 255)
+	yellowPts = deque(maxlen=trail_length)
+	boundLower.append(yellowLower)
+	boundUpper.append(yellowUpper)
+	markerColor.append(yellowMarker)
+	pts.append(yellowPts)
 
 #pts = deque(maxlen=trail_length)
 
@@ -57,24 +83,33 @@ time.sleep(1.0)
 
 #Main loop
 while True:
-	#read webcam frame
+	#Read webcam frame, flip it
 	frame = vs.read()
+	frame = np.fliplr(frame)
 
 	if frame is None:
 		print("Could not grab frame")
 		break
 	# resize, blur, convert to HSV
-	frame = imutils.resize(frame, width=600)
+	frame = imutils.resize(frame, width=800)
 	blurred = cv2.GaussianBlur(frame, (11, 11), 0)
 	hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-	Center=[];
 	for i in range(0, ind):
 		# construct a mask for each color 
 		# dilate and erode to remove imperfections
-		mask = cv2.inRange(hsv, boundLower[i], boundUpper[i])
+
+		# If the color is red, invert the convert the BGR image and look for cyan
+		if colorLabel[i] == "red":
+			blurredInv = ~blurred
+			hsvInv = cv2.cvtColor(blurredInv, cv2.COLOR_BGR2HSV)
+			mask = cv2.inRange(hsvInv, boundLower[i], boundUpper[i]) 
+		else:
+			mask = cv2.inRange(hsv, boundLower[i], boundUpper[i])
+			
 		mask = cv2.erode(mask, None, iterations=2)
 		mask = cv2.dilate(mask, None, iterations=2)
+
 		
 
 		# find contours in the mask and initialize the current (x, y) center of each contour
@@ -93,7 +128,7 @@ while True:
 			center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
 
 			# only proceed if the radius is at least 10 pixels
-			if radius > 10:
+			if radius > 20:
 				# draw bounding circle and centroid on the frame,
 				cv2.circle(frame, (int(x), int(y)), int(radius), markerColor[i], 2)
 				cv2.circle(frame, center, 5, markerColor[i], -1)
@@ -122,5 +157,3 @@ while True:
 # Stop the webcam, close window
 vs.stop()
 cv2.destroyAllWindows()
-
-
