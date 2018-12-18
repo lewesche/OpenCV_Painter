@@ -9,7 +9,7 @@ from collections import deque
 ########################################################
 #Enter colors, last colors show up on top
 #Choose from green, blue, red, yellow, purple        
-colors = ["green", "blue", "red", "yellow"]
+colors = ["red", "blue", "green"]
 trail_length = 30 # Determines the length of the path
 ########################################################
 
@@ -95,7 +95,7 @@ while True:
 	contourView = imutils.resize(contourView, width=800)
 	blurred = cv2.GaussianBlur(frame, (11, 11), 0)
 	hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-
+	
 	for i in range(0, ind):
 		# construct a mask for each color 
 		# dilate and erode to remove imperfections
