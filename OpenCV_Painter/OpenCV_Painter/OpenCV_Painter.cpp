@@ -72,25 +72,16 @@ int main() {
 			}
 
 			drawContours(frame, contours, largestContourIdx, Scalar(255, 0, 0), 3);
-			
+
 			//vector<vector<Point> > contours_poly(contours.size());
-			//
-			//Point2f center;
-			//float radius;
-			//minEnclosingCircle(contours_poly[largestContourIdx], center, radius);
-
-
-			vector<vector<Point> > contours_poly(contours.size());
-			vector<Rect> boundRect(contours.size());
-			vector<Point2f>centers(contours.size());
-			vector<float>radius(contours.size());
-			for (size_t i = 0; i < contours.size(); i++)
-			{
-				approxPolyDP(contours[i], contours_poly[i], 3, true);
-				boundRect[i] = boundingRect(contours_poly[i]);
-				minEnclosingCircle(contours_poly[i], centers[i], radius[i]);
-				circle(frame, centers[i], (int)radius[i], Scalar(255, 0, 0), 2);
-			}
+			vector<Point> contours_poly; 
+			Point2f centers;
+			float radius;
+			
+			approxPolyDP(contours[largestContourIdx], contours_poly, 3, true);
+			minEnclosingCircle(contours_poly, centers, radius);
+			circle(frame, centers, (int)radius, Scalar(255, 0, 0), 2);
+			circle(frame, centers, 2, Scalar(255, 0, 0), 4);
 
 
 
