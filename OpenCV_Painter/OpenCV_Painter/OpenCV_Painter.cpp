@@ -73,25 +73,19 @@ int main() {
 
 			drawContours(frame, contours, largestContourIdx, Scalar(255, 0, 0), 3);
 
-			//vector<vector<Point> > contours_poly(contours.size());
 			vector<Point> contours_poly; 
-			Point2f centers;
+			Point2f center;
 			float radius;
 			
 			approxPolyDP(contours[largestContourIdx], contours_poly, 3, true);
-			minEnclosingCircle(contours_poly, centers, radius);
-			circle(frame, centers, (int)radius, Scalar(255, 0, 0), 2);
-			circle(frame, centers, 2, Scalar(255, 0, 0), 4);
-
-
+			minEnclosingCircle(contours_poly, center, radius);
+			circle(frame, center, (int)radius, Scalar(255, 0, 0), 2);
+			circle(frame, center, 2, Scalar(255, 0, 0), 4);
 
 			imshow("Frame", frame);
 			imshow("Processed Frame", processedFrame);
 			if (waitKey(30) >= 0) break;
 		}
-
-
-
 
 	return 0;
 }
